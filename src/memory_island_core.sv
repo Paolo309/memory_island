@@ -47,6 +47,13 @@ module memory_island_core #(
   /// Relinquish narrow priority after x cycles, 0 for never. Requires SpillNarrowReqRouted==0.
   parameter int unsigned WidePriorityWait = 1,
 
+  /// Outstanding requests the wide interconnect tracks, per requestor and per wide bank
+  parameter int unsigned WideNumOutstanding = 3,
+  /// The split of wide requests to the banks accepts WideMaxTrans+1 outstanding transactions
+  parameter int unsigned WideMaxTrans       = 2,
+  /// Depth of the per-bank request and response FIFOs in that split, must be >=1
+  parameter int unsigned WideFifoDepth      = 3,
+
   // Derived, DO NOT OVERRIDE
   parameter int unsigned NarrowStrbWidth   = NarrowDataWidth / 8,
   parameter int unsigned WideStrbWidth     = WideDataWidth / 8,
@@ -442,7 +449,7 @@ module memory_island_core #(
     .BeWidth       (WideStrbWidth),
     .AddrMemWidth  (BankAddrMemWidth),
     .WriteRespOn   (1),
-    .NumOutstanding(3),
+    .NumOutstanding(WideNumOutstanding),
     .Topology      (tcdm_interconnect_pkg::LIC)
   ) i_wide_interco (
     .clk_i,
@@ -519,8 +526,8 @@ module memory_island_core #(
       .RUserWidth(1),
       .NumBanks  (NWDivisor),
       .HideStrb  (1'b1),
-      .MaxTrans  (2),                                   // TODO tune?
-      .FifoDepth (3)                                    // TODO tune?
+      .MaxTrans  (WideMaxTrans),
+      .FifoDepth (WideFifoDepth)
     ) i_wide_to_banks (
       .clk_i,
       .rst_ni,

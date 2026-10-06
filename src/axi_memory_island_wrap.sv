@@ -51,6 +51,13 @@ module axi_memory_island_wrap #(
   /// Relinquish narrow priority after x cycles, 0 for never. Requires SpillNarrowReqRouted==0.
   parameter int unsigned WidePriorityWait = 1,
 
+  /// Outstanding requests the wide interconnect tracks, per requestor and per wide bank
+  parameter int unsigned WideNumOutstanding = 3,
+  /// The split of wide requests to the banks accepts WideMaxTrans+1 outstanding transactions
+  parameter int unsigned WideMaxTrans       = 2,
+  /// Depth of the per-bank request and response FIFOs in that split, must be >=1
+  parameter int unsigned WideFifoDepth      = 3,
+
   /// Banking Factor for the Wide Ports (power of 2)
   parameter int unsigned NumWideBanks      = (1 << $clog2(NumWideReq)) * 2 * 2,
   /// Extra multiplier for the Narrow banking factor (baseline is WideWidth/NarrowWidth) (power of 2)
@@ -247,6 +254,9 @@ module axi_memory_island_wrap #(
     .SpillReqBank        (SpillReqBank),
     .SpillRspBank        (SpillRspBank),
     .WidePriorityWait    (WidePriorityWait),
+    .WideNumOutstanding  (WideNumOutstanding),
+    .WideMaxTrans        (WideMaxTrans),
+    .WideFifoDepth       (WideFifoDepth),
     .MemorySimInit       (MemorySimInit),
     .BankAccessLatency   (BankAccessLatency)
   ) i_memory_island (
